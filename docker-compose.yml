@@ -1,0 +1,46 @@
+version: '3'
+
+services: 
+  some-mysql-container:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=customer_db
+      - MYSQL_PASSWORD=root
+    ports:
+      - "3307:3306"
+    networks:
+      - backend
+    volumes:
+     - db_data:/var/lib/mysql/data
+      
+  customer-crud-client:
+    image: customercrudclient:latest
+    depends_on:
+      - some-mysql-container
+    ports:
+     - "4200:80"
+    networks:
+      - frontend
+     
+  customer-crud-api:
+    image: customer-crud-sql:appTag
+    depends_on:
+      - some-mysql-container
+    ports:
+      - 8080:8080
+    environment:
+      - DATABASE_HOST=some-mysql-container
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=root
+      - DATABASE_NAME=customer_db  
+    networks:
+      - frontend
+      - backend
+
+networks:
+  frontend:
+  backend:
+  
+volumes:
+  db_data:
